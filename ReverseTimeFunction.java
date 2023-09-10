@@ -1,10 +1,13 @@
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Scanner;
 
 public class ReverseTimeFunction {
 	
-	private static final int MAX_YEAR_DIFFERENCE = 100000;
+    private static final int MAX_YEAR_DIFFERENCE = 100000;
 	
     public static void main(String[] args) {
-    	printBonusDatesBetween(5,100000000);
+    	printBonusDatesBetween(5,2000);
     }
     
     public static void printBonusDatesBetween(int startingYear, int endingYear) {
@@ -12,27 +15,14 @@ public class ReverseTimeFunction {
     	if(!checkIfValidDateInput(startingYear, endingYear)) {
     		System.exit(1);
     	}
-    		
-    	int startYear = startingYear;
-    	int endYear = endingYear;
-
-    	while(startYear <= endYear) {
-    		
-    		for(int month = 1; month < 13; month++) {
-    			
-    			int daysInMonth = getDaysInMonth(startYear, month);
-    			
-    			for(int currentDay = 1; currentDay <= daysInMonth; currentDay++) {
-    				String day = formatDate(startYear,month,currentDay);
-    				if(checkIfReversedDateEqual(day)) {
-    					System.out.println(day);
-    				}
-    				else {
-    					continue;
-    				}
-    			}
-    		}
-    		startYear++;
+    	
+    	int choice = whereToDisplayResult();
+    	
+    	if(choice == 1) {
+    		printDateToConsole(startingYear, endingYear);
+    	}
+    	else {
+    		printDateToFile(startingYear, endingYear);
     	}
     }
     
@@ -123,4 +113,93 @@ public class ReverseTimeFunction {
     	return true;
     }
     
+    private static void printDateToConsole(int startingYear, int endingYear) {
+    	
+    	int startYear = startingYear;
+    	int endYear = endingYear;
+
+    	while(startYear <= endYear) {
+    		
+    		for(int month = 1; month < 13; month++) {
+    			
+    			int daysInMonth = getDaysInMonth(startYear, month);
+    			
+    			for(int currentDay = 1; currentDay <= daysInMonth; currentDay++) {
+    				String day = formatDate(startYear,month,currentDay);
+    				if(checkIfReversedDateEqual(day)) {
+    					System.out.println(day);
+    				}
+    				else {
+    					continue;
+    				}
+    			}
+    		}
+    		startYear++;
+    	}
+    	System.out.println("\nAll results are diplayed!");
+    }
+    
+    private static void printDateToFile(int startingYear, int endingYear) {
+    	
+        try (FileWriter fileWriter = new FileWriter("result.txt")) {
+        	
+            int startYear = startingYear;
+            int endYear = endingYear;
+            
+            fileWriter.write("Dates between " + startYear + " and " + endYear);
+            fileWriter.write("\n-------------------------------------------\n");
+            fileWriter.write("(year-month-day)\n\n");
+
+            while (startYear <= endYear) {
+                for (int month = 1; month < 13; month++) {
+                    int daysInMonth = getDaysInMonth(startYear, month);
+
+                    for (int currentDay = 1; currentDay <= daysInMonth; currentDay++) {
+                        String day = formatDate(startYear, month, currentDay);
+                        if (checkIfReversedDateEqual(day)) {
+                            fileWriter.write(day + System.lineSeparator());
+                        }
+                    }
+                }
+                startYear++;
+            }
+            System.out.println("Succesfully written!");
+        }
+        catch (IOException e) {
+            System.err.println("An error occurred while writing to the file: " + e.getMessage());
+        }
+    }
+    
+    private static int whereToDisplayResult() {
+    	
+    	    Scanner scanner = new Scanner(System.in);
+
+    	    int choice = 0;
+    	    boolean validChoice = false;
+
+    	    do {
+    	        System.out.println("Where would you like to display the result?");
+    	        System.out.println("1. Console");
+    	        System.out.println("2. File");
+
+    	        try {
+    	            choice = Integer.parseInt(scanner.nextLine());
+
+    	            if (choice == 1 || choice == 2) {
+    	                validChoice = true;
+    	            }
+    	            else {
+    	                System.out.println("Invalid choice. Please enter 1 for Console or 2 for File.");
+    	            }
+    	        }
+    	        catch (NumberFormatException e) {
+    	            System.out.println("Invalid input. Please enter 1 for Console or 2 for File.");
+    	        }
+
+    	    } while (!validChoice);
+
+    	    return choice;
+    }
+    
 }
+
