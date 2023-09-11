@@ -2,23 +2,35 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
-public class ReverseTimeFunction {
+// Did not use date/time library on purpose
+ 
+public class ReverseDateFunction {
 	
-    private static final int MAX_YEAR_DIFFERENCE = 100000;
+    // Private constructor to prevent object creation
+    private ReverseDateFunction() {}
 	
+	// MAX_YEAR_DIFFERENCE is used to give control to the developer
+	private static final int MAX_YEAR_DIFFERENCE = 100000;
+	
+	// Program start
     public static void main(String[] args) {
-    	printBonusDatesBetween(5,2000);
+    	printBonusDatesBetween(2000,2500);
     }
     
+    /*
+     * Method which displays all dates between
+     * two given years that remain the same even
+     * if numbers of the date are reversed
+     */
     public static void printBonusDatesBetween(int startingYear, int endingYear) {
     	
     	if(!checkIfValidDateInput(startingYear, endingYear)) {
     		System.exit(1);
     	}
     	
-    	int choice = whereToDisplayResult();
+    	int userChoice = whereToDisplayResult();
     	
-    	if(choice == 1) {
+    	if(userChoice == 1) {
     		printDateToConsole(startingYear, endingYear);
     	}
     	else {
@@ -26,6 +38,7 @@ public class ReverseTimeFunction {
     	}
     }
     
+    // Checks if current year is leap year
     private static boolean isLeapYear(int year) {
     	
         if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) {
@@ -36,6 +49,7 @@ public class ReverseTimeFunction {
         }
     }
     
+    // Returns how many days are in particular month
     private static int getDaysInMonth(int year, int month) {
     	
         switch (month) {
@@ -56,28 +70,38 @@ public class ReverseTimeFunction {
         }
     }
     
-    private static String formatDate(int year, int month, int day) {
+    /*
+     * Adds zeroes to months and days if in range 1-9
+     * For example it will transform 2023-9-5 to 2023-09-05
+     * Turns separate numbers into one formatted string 
+     */
+    private static String getFormattedDate(int year, int month, int day) {
     	
-    	String formatMonth;
-    	String formatDay;
+    	String formattedMonth;
+    	String formattedDay;
     	
     	if(month > 9) {
-    		formatMonth = Integer.toString(month);
+    		formattedMonth = Integer.toString(month);
     	}
     	else {
-    		formatMonth = "0" + Integer.toString(month);
+    		formattedMonth = "0" + Integer.toString(month);
     	}
     	
     	if(day > 9) {
-    		formatDay = Integer.toString(day);
+    		formattedDay = Integer.toString(day);
     	}
     	else {
-    		formatDay = "0" + Integer.toString(day);
+    		formattedDay = "0" + Integer.toString(day);
     	}
     	
-    	return year + "-" + formatMonth + "-" + formatDay;
+    	return year + "-" + formattedMonth + "-" + formattedDay;
     }
     
+    /* 
+     * Checks if reversed date is equal to original
+     * For example it will reverse 7056-11-05 to 5011-65-07
+     * (and will check their equality)
+     */
     private static boolean checkIfReversedDateEqual(String date) {
     	
     	String originalDate = date.replaceAll("-", "");
@@ -91,6 +115,7 @@ public class ReverseTimeFunction {
     	}
     }
     
+    // Checks if invalid input was given by the user
     private static boolean checkIfValidDateInput(int startingYear, int endingYear) {
     	
     	if(startingYear < 0 || endingYear < 0) {
@@ -113,6 +138,7 @@ public class ReverseTimeFunction {
     	return true;
     }
     
+    // Prints result to the user's console
     private static void printDateToConsole(int startingYear, int endingYear) {
     	
     	int startYear = startingYear;
@@ -125,12 +151,13 @@ public class ReverseTimeFunction {
     			int daysInMonth = getDaysInMonth(startYear, month);
     			
     			for(int currentDay = 1; currentDay <= daysInMonth; currentDay++) {
-    				String day = formatDate(startYear,month,currentDay);
+    				
+    				String day = getFormattedDate(startYear,month,currentDay);
     				if(checkIfReversedDateEqual(day)) {
     					System.out.println(day);
     				}
     				else {
-    					continue;
+    					continue; // Skipping when reversed date isn't equal to original
     				}
     			}
     		}
@@ -139,42 +166,66 @@ public class ReverseTimeFunction {
     	System.out.println("\nAll results are diplayed!");
     }
     
+    // Writes result to result.txt which will appear in current project folder
     private static void printDateToFile(int startingYear, int endingYear) {
     	
-        try (FileWriter fileWriter = new FileWriter("result.txt")) {
-        	
+        FileWriter fileWriter = null;
+        try {
+            fileWriter = new FileWriter("result.txt");
             int startYear = startingYear;
             int endYear = endingYear;
-            
+
             fileWriter.write("Dates between " + startYear + " and " + endYear);
             fileWriter.write("\n-------------------------------------------\n");
             fileWriter.write("(year-month-day)\n\n");
 
             while (startYear <= endYear) {
+            	
                 for (int month = 1; month < 13; month++) {
+                	
                     int daysInMonth = getDaysInMonth(startYear, month);
 
                     for (int currentDay = 1; currentDay <= daysInMonth; currentDay++) {
-                        String day = formatDate(startYear, month, currentDay);
+                    	
+                        String day = getFormattedDate(startYear, month, currentDay);
                         if (checkIfReversedDateEqual(day)) {
                             fileWriter.write(day + System.lineSeparator());
+                        }
+                        else {
+                            continue; // Skipping when reversed date isn't equal to original
                         }
                     }
                 }
                 startYear++;
             }
-            System.out.println("Succesfully written!");
+            
+            System.out.println("Successfully written!");
         }
         catch (IOException e) {
             System.err.println("An error occurred while writing to the file: " + e.getMessage());
         }
+        finally {
+            try {
+                if (fileWriter != null) {
+                    fileWriter.close();
+                }
+            }
+            catch (IOException e) {
+                System.err.println("Error closing FileWriter: " + e.getMessage());
+            }
+        }
     }
     
+    /*
+     * Gives user an option on where he wants results to be displayed
+     * 1 - to the console
+     * 2 - write to the file
+     */
     private static int whereToDisplayResult() {
     	
     	    Scanner scanner = new Scanner(System.in);
 
-    	    int choice = 0;
+    	    int userChoice = 0;
     	    boolean validChoice = false;
 
     	    do {
@@ -183,9 +234,9 @@ public class ReverseTimeFunction {
     	        System.out.println("2. File");
 
     	        try {
-    	            choice = Integer.parseInt(scanner.nextLine());
+    	            userChoice = Integer.parseInt(scanner.nextLine());
 
-    	            if (choice == 1 || choice == 2) {
+    	            if (userChoice == 1 || userChoice == 2) {
     	                validChoice = true;
     	            }
     	            else {
@@ -197,9 +248,8 @@ public class ReverseTimeFunction {
     	        }
 
     	    } while (!validChoice);
-
-    	    return choice;
+    	    
+    	    scanner.close();
+    	    return userChoice;
     }
-    
 }
-
